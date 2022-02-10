@@ -1,4 +1,5 @@
 from calendar import month
+from copy import copy
 from email.policy import default
 from odoo import models, fields
 from datetime import date
@@ -12,7 +13,8 @@ class Property(models.Model):
     name = fields.Char("Property name", size=30, required=True)
     description = fields.Char("Property description", size=30)
     post_code = fields.Char("Postal code", size=5)
-    date_availability = fields.Date(copy=False, default=date.today() + relativedelta(months=3))
+    date_availability = fields.Date(
+        copy=False, default=date.today() + relativedelta(months=3))
     expected_price = fields.Float(required=True)
     selling_price = fields.Float(readonly=True, copy=False)
     bedrooms = fields.Integer(default=2)
@@ -29,3 +31,10 @@ class Property(models.Model):
                              selection=[("new", "New"), ("accepted", "Offer Accepted"), ("sold", "Sold"),
                                         ("canceled", "Canceled"), ("received", "Offer Received")],
                              default="new")
+    property_type_id = fields.Many2one(
+        "estate.property.type", string="Property type")
+    salesperson_id = fields.Many2one(
+        "res.partner", string="Salesperson", default=lambda self: self._uid)
+    buyer_id = fields.Many2one("res.users", string="Buyer", copy=False)
+    tag_ids = fields.Many2many("estate.property.tag", string="Tags")
+    offer_ids = fields.One2many("estate.property.offer", "property_id", string="Offers")
